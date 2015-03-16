@@ -1,1 +1,5 @@
-name = Menu Link Weight
+core           = "7.x"
+dependencies[] = menu
+description    = "Replaces the menu link weight dropdown with a tabledrag widget"
+name           = "Menu Link Weight"
+package        = "Menu Link Weight"

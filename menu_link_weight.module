@@ -1,0 +1,355 @@
+<?php
+/**
+ * @file
+ * Replaces the menu link weight dropdown with a tabledrag widget.
+ */
+
+/**
+ * @var int Minimum weight of a menu link. In Drupal core this is currently -50.
+ */
+define('MENU_LINK_WEIGHT_MIN_DELTA', -50);
+define('MENU_LINK_WEIGHT_MAX_DELTA', 50);
+
+/**
+ *
+ * @see _menu_parents_recurse
+ */
+function menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_item_title = NULL) {
+  // Get raw tree from database.
+  $tree = _menu_link_weight_get_tree($menu_name, $plid);
+  // Weights will have to be re-ordered from -50 to 50 for fine-grained
+  // control over the weight of the new element.
+  $weight = MENU_LINK_WEIGHT_MIN_DELTA;
+  $options = array();
+
+  // Find out whether to add another (fake) item for the new link.
+  $add_link = TRUE;
+  foreach ($tree as $data) {
+    if ($data['link']['mlid'] == $current_mlid) {
+      $add_link = FALSE;
+    }
+  }
+
+  // Add link on top, if needed.
+  if ($add_link === TRUE) {
+    $options['link_current'] = array(
+      'title' => '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE)  . '</strong> (' . t('current menu link to be created') . ')',
+      'weight' => $weight,
+      'db_weight' => NULL,
+      'current' => TRUE,
+    );
+    $weight++;
+  }
+
+  // Loop through tree again.
+  foreach ($tree as $data) {
+    // Change title & ID for current menu link.
+    if ($data['link']['mlid'] == $current_mlid) {
+      $id = 'link_current';
+      $title = '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</strong> (current menu link)';
+    }
+    else {
+      $id = $data['link']['mlid'];
+      $title = l(truncate_utf8($data['link']['link_title'], 30, TRUE, FALSE), $data['link']['link_path'], array('attributes' => array('target' => '_blank')));
+      if ($data['link']['hidden']) {
+        $title .= ' (' . t('disabled') . ')';
+      }
+    }
+
+    $options[$id] = array(
+      'title' => $title,
+      'weight' => $weight,
+      'db_weight' => $data['link']['weight'],
+    );
+    $weight++;
+  }
+  return $options;
+}
+
+/**
+ * Helper function to get all siblings of an item based on the parent.
+ */
+function _menu_link_weight_get_tree($menu_name, $plid) {
+  global $menu_admin;
+  $trees = &drupal_static(__FUNCTION__);
+  if (isset($trees[$menu_name])) {
+    return $trees[$menu_name];
+  }
+  $item = array(
+    'mlid' => $plid,
+  );
+  if ($plid != 0) {
+    $link = menu_Link_load($plid);
+    $limit = $link['depth'] + 1;
+  }
+  else {
+    $limit = 1;
+  }
+  // When calling menu_build_tree, be aware of core bug:
+  // https://www.drupal.org/node/1477608
+  $menu_admin = TRUE;
+  $tree = menu_build_tree($menu_name, array(
+    'active_trail' => array($plid),
+    'only_active_trail' => FALSE,
+    'min_depth' => $limit,
+    'max_depth' => $limit,
+    'conditions' => array('plid' => $plid)
+  ));
+  $menu_admin = FALSE;
+  $trees[$menu_name] = $tree;
+  return $tree;
+}
+
+/**
+ *  Allow other modules to reorder the tree and insert the current item
+ *  under/above a specified other item.
+ *
+ *  $relative_position string Where to insert the current item.
+ */
+function _menu_link_weight_reorder_options($options, $relative_position) {
+  $weight = MENU_LINK_WEIGHT_MIN_DELTA;
+  $reordered_options = array();
+  if (isset($options['link_current'])) {
+    $link_current = $options['link_current'];
+    unset($options['link_current']);
+  }
+  else {
+    return;
+  }
+  if ($relative_position == 'top') {
+    $reordered_options['link_current'] = $link_current;
+    $reordered_options['link_current']['weight'] = $weight;
+    $weight++;
+  }
+  foreach ($options as $id => $option) {
+    if ($relative_position == 'above_' . $id) {
+      $reordered_options['link_current'] = $link_current;
+      $reordered_options['link_current']['weight'] = $weight;
+      $weight++;
+    }
+    $reordered_options[$id] = $options[$id];
+    $reordered_options[$id]['weight'] = $weight;
+    $weight++;
+    if ($relative_position == 'below_' . $id) {
+      $reordered_options['link_current'] = $link_current;
+      $reordered_options['link_current']['weight'] = $weight;
+      $weight++;
+    }
+  }
+  return $reordered_options;
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function menu_link_weight_element_info_alter(&$types) {
+  // See https://drupal.stackexchange.com/questions/49216/how-to-add-a-process-callback-to-a-fieldset-form-element-without-overwriting-th
+  $types['fieldset']['#process'][] = 'menu_link_weight_node_element_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
+  unset($form['menu']['link']['weight']);
+  $form['#validate'][] = 'menu_link_weight_node_form_validate';
+  $form['#submit'][] = 'menu_link_weight_node_form_submit';
+  $form['menu']['link']['menu_link_weight'] = array(
+    '#tree' => TRUE,
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => t('Menu link weight'),
+    '#theme' => 'menu_link_weight_reorder_element',
+    '#prefix' => '<div id="menu-link-weight-wrapper">',
+    '#suffix' => '</div>',
+    '#menu_link_weight_process' => TRUE,
+  );
+  $form['menu']['link']['db_weights'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['menu']['link']['parent']['#ajax'] = array(
+    'callback' => 'menu_link_weight_parent_ajax_callback',
+    'wrapper' => 'menu-link-weight-wrapper',
+  );
+
+
+}
+
+function menu_link_weight_node_element_process($element, &$form_state, &$complete_form) {
+  if (empty($element['#menu_link_weight_process'])) {
+    return $element;
+  }
+  $options = array();
+
+  if ($complete_form['menu']['link']['parent']['#type'] == 'hierarchical_select') {
+    $hs_selection = _hierarchical_select_process_get_hs_selection($complete_form['menu']['link']['parent']);
+    $value = reset($hs_selection);
+  }
+  else {
+    $value = isset($form_state['values']['menu']['parent']) && is_string($form_state['values']['menu']['parent']) ? $form_state['values']['menu']['parent'] : $complete_form['menu']['link']['parent']['#default_value'];
+  }
+  list($menu_name, $parent_mlid) = explode(':', $value);
+
+  // Get name based on this.
+  if ($parent_mlid == 0) {
+    $menu = menu_load($menu_name);
+    $parent_title = $menu['title'];
+  }
+  else {
+    $link = menu_link_load($parent_mlid);
+    $parent_title = $link['link_title'];
+  }
+  $element['#description'] = t('Set up the weight of the provided menu link within the %menu_title menu.', array('%menu_title' => $parent_title));
+
+
+  $current_mlid = isset($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
+  $new_item_title = isset($form_state['values']['menu']['link_title']) ? $form_state['values']['menu']['link_title'] : $complete_form['menu']['link']['link_title']['#default_value'];
+  $options = menu_link_weight_get_options($menu_name, $parent_mlid, $current_mlid, $new_item_title);
+  if (!empty($form_state['menu_link_weight_relative_position'])) {
+    $options = _menu_link_weight_reorder_options($options, $form_state['menu_link_weight_relative_position']);
+  }
+
+  foreach ($options as $mlid => $info) {
+    $element[$mlid] = array(
+      'name' => array(
+        // Title should have already been sanitized here!
+        '#markup' => $info['title'],
+      ),
+      'weight' => array(
+        '#type' => 'weight',
+        '#title' => t('Weight'),
+        '#default_value' => $info['weight'],
+        '#delta' => MENU_LINK_WEIGHT_MAX_DELTA,
+        '#title_display' => 'invisible',
+      ),
+    );
+    $complete_form['menu']['link']['db_weights'][$mlid] = array(
+      '#type' => 'hidden',
+      '#value' => $info['db_weight'],
+    );
+  }
+  return $element;
+}
+
+/**
+ * AJAX callback that returns the menu_link_weight element.
+ */
+function menu_link_weight_parent_ajax_callback($form, $form_state) {
+  return $form['menu']['link']['menu_link_weight'];
+}
+
+/**
+ * Validation hook.
+ */
+function menu_link_weight_node_form_validate(&$form, &$form_state) {
+ // Check that children and weights are still the same as when the form was
+ // loaded.
+ if (isset($form_state['input']['menu']['db_weights'])) {
+   foreach ($form_state['input']['menu']['db_weights'] as $mlid => $db_weight) {
+     $link = menu_link_load($mlid);
+     if (!empty($link)) {
+       if ($link['weight'] != $db_weight) {
+         form_set_error('menu_link_weight', t('The menu link weights have been changed by another user, please try again.'));
+       }
+     }
+   }
+ }
+}
+
+/**
+ * Submit hook.
+ */
+function menu_link_weight_node_form_submit($form, &$form_state) {
+  db_transaction();
+  // Because the form elements were keyed with the item ids from the database,
+  // we can simply iterate through the submitted values.
+  foreach ($form_state['values']['menu']['menu_link_weight'] as $mlid => $info) {
+    if ($mlid == 'link_current') {
+      // Do nothing. This will be handled in hook_node_submit() instead.
+      continue;
+    }
+    $link = menu_link_load($mlid);
+    $link['weight'] = $info['weight'];
+    menu_link_save($link);
+  }
+}
+
+/**
+ * Implements hook_node_submit().
+ */
+function menu_link_weight_node_submit($node, $form, $form_state) {
+  // Override the weight of the current link upon node submission.
+  if (isset($node->menu['menu_link_weight']['link_current']['weight'])) {
+    $node->menu['weight'] = $node->menu['menu_link_weight']['link_current']['weight'];
+  }
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * We need run our forms through custom theme functions in order to build the
+ * table structure which is required by tabledrag.js.  Before we can use our
+ * custom theme functions, we need to implement hook_theme in order to register
+ * them with Drupal.
+ *
+ * We are defining our theme hooks with the same name as the form generation
+ * function so that Drupal automatically calls our theming function when the
+ * form is displayed.
+ */
+function menu_link_weight_theme() {
+  return array(
+    // Theme function for the 'simple' example.
+    'menu_link_weight_reorder_element' => array(
+      'render element' => 'element',
+      'file' => 'menu_link_weight.module',
+    ),
+  );
+}
+
+function menu_link_weight_hierarchical_select_ajax_commands_alter(&$commands, $context) {
+  $commands[] = array(
+    'command' => 'menuLinkWeightHierarchicalSelectUpdate',
+    'output'  => drupal_render($context['form']['menu']['link']['menu_link_weight']),
+  );
+}
+
+/**
+ * Theme callback for the menu_link_weight element in the node form.
+ *
+ * @see tabledrag_example_simple_form
+ */
+function theme_menu_link_weight_reorder_element($variables) {
+  // See tabledrag_example_simple_form() for an explanation of what happens
+  // here.
+  $element = $variables['element'];
+
+  $rows = array();
+  foreach (element_children($element) as $id) {
+    $weight_class = 'menu-link-weight-item-weight';
+    $element[$id]['weight']['#attributes']['class'] = array($weight_class);
+    $class = array('draggable');
+    if ($id == 'link_current') {
+      // Make the row yellow.
+      $class[] = 'warning';
+    }
+    $rows[] = array(
+      'data' => array(
+        drupal_render($element[$id]['name']),
+        drupal_render($element[$id]['weight']),
+      ),
+      'class' => $class,
+    );
+  }
+  $table_id = 'menu-link-weight-reorder';
+
+  $output = theme('table', array(
+    'header' => array(t('Name'), t('Weight')),
+    'rows' => $rows,
+    'attributes' => array('id' => $table_id),
+  ));
+
+  drupal_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
+
+  return $output;
+}
