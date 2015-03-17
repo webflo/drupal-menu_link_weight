@@ -306,7 +306,7 @@ function menu_link_weight_node_form_submit($form, &$form_state) {
       menu_link_save($link);
     }
   }
-  catch(Exception$e) {
+  catch (Exception $e) {
     $transaction->rollback();
     watchdog_exception('menu_link_weight', $e);
   }
