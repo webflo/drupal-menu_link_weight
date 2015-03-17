@@ -94,7 +94,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
 
   // Find out which parent to select after loading (or AJAX reloading) the form.
   if ($complete_form['menu']['link']['parent']['#type'] == 'hierarchical_select') {
-    // Added for compatiblity with the Hierarchical Select module.
+    // Added for compatibility with the Hierarchical Select module.
     $hs_selection = _hierarchical_select_process_get_hs_selection($complete_form['menu']['link']['parent']);
     $value = reset($hs_selection);
   }
