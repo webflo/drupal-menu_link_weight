@@ -1,0 +1,5 @@
+name = "Menu Link Weight Test"
+package = "Menu Link Weight"
+description = Support module for the Menu Link Weight Simpletests.
+core = 7.x
+hidden = TRUE

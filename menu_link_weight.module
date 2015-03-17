@@ -4,7 +4,9 @@
  * Replaces the menu link weight dropdown with a tabledrag widget.
  */
 
-// Include functionality related to reordering of options by other modules.
+/**
+ * Include functionality related to reordering of options by other modules.
+ */
 require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'menu_link_weight') . '/menu_link_weight.reorder.inc';
 
 /**
@@ -21,9 +23,13 @@ define('MENU_LINK_WEIGHT_MAX_DELTA', 50);
  * Implements hook_form_FORM_ID_alter().
  */
 function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
+  if (!user_access('administer menu')) {
+    // Only allow users with "administer menu" permissions.
+    return;
+  }
   // Remove the "weight" widget.
   unset($form['menu']['link']['weight']);
-  // Add submission/validatin handlers.
+  // Add submission/validation handlers.
   $form['#validate'][] = 'menu_link_weight_node_form_validate';
   $form['#submit'][] = 'menu_link_weight_node_form_submit';
   // Add the Menu Link weight fieldset.
@@ -46,6 +52,9 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
   $form['menu']['link']['db_weights'] = array(
     '#tree' => TRUE,
   );
+  if (module_exists('hierarchical_select')) {
+    $form['#attached']['js'][] = drupal_get_path('module', 'menu_link_weight') . '/menu_link_weight.hierarchical_select.js';
+  }
   // Define the AJAX callback for changes in the Parent element.
   $form['menu']['link']['parent']['#ajax'] = array(
     'callback' => 'menu_link_weight_parent_ajax_callback',
@@ -131,13 +140,15 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
         '#title_display' => 'invisible',
       ),
     );
-    // Save the current weight in the database of the rendered menu links
-    // into the form, so that we can give an error if the weights have changed
-    // by the time the form is submitted.
-    $complete_form['menu']['link']['db_weights'][$mlid] = array(
-      '#type' => 'hidden',
-      '#value' => $info['db_weight'],
-    );
+    if ($mlid != 'link_current') {
+      // Save the current weight in the database of the rendered menu links
+      // into the form, so that we can give an error if the weights have changed
+      // by the time the form is submitted.
+      $complete_form['menu']['link']['db_weights'][$mlid] = array(
+        '#type' => 'hidden',
+        '#value' => $info['db_weight'],
+      );
+    }
   }
   return $element;
 }
@@ -164,7 +175,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  *     - db_weight: Current weight in the database, while form is being built.
  */
 function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_item_title = NULL) {
-  // Get raw tree from database.
+  // Get the raw tree from the database.
   $tree = _menu_link_weight_get_tree($menu_name, $plid);
   // Weights will have to be re-ordered from -50 to 50 for fine-grained
   // control over the weight of the new element.
@@ -189,9 +200,9 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
     $weight++;
   }
 
-  // Loop through tree again.
+  // Loop through the tree again.
   foreach ($tree as $data) {
-    // Change title & ID for current menu link.
+    // Change the title & ID for the current menu link.
     if ($data['link']['mlid'] == $current_mlid) {
       $id = 'link_current';
       $title = '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</strong> (' . t('current menu link') . ')';
@@ -216,6 +227,14 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
 
 /**
  * Helper function to get all siblings of an item based on the parent.
+ *
+ * @param string $menu_name
+ *   Name of the menu.
+ * @param int $plid
+ *   Parent link ID.
+ *
+ * @return array
+ *   List of all items under the plid.
  */
 function _menu_link_weight_get_tree($menu_name, $plid) {
   global $menu_admin;
@@ -230,9 +249,12 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
   else {
     $limit = 1;
   }
+
+  // We indicate that a menu administrator will be running the menu access
+  // check.
+  $menu_admin = TRUE;
   // When calling menu_build_tree, be aware of core bug:
   // https://www.drupal.org/node/1477608
-  $menu_admin = TRUE;
   $tree = menu_build_tree($menu_name, array(
     'active_trail' => array($plid),
     'only_active_trail' => FALSE,
@@ -379,12 +401,14 @@ function theme_menu_link_weight_reorder_element($variables) {
  * Alters hierarchical_select_ajax_commands().
  *
  * Introduced for compatibility with the Hierarchical Select module, which uses
- * a custom AJAX implementtion. Makes sure the menu link weight widget
+ * a custom AJAX implementation. Makes sure the menu link weight widget
  * updates when the Hierarchical Select selection changes.
  */
 function menu_link_weight_hierarchical_select_ajax_commands_alter(&$commands, $context) {
-  $commands[] = array(
-    'command' => 'menuLinkWeightHierarchicalSelectUpdate',
-    'output'  => drupal_render($context['form']['menu']['link']['menu_link_weight']),
-  );
+  if (isset($context['form']['menu']['link']['menu_link_weight'])) {
+    $commands[] = array(
+      'command' => 'menuLinkWeightHierarchicalSelectUpdate',
+      'output'  => drupal_render($context['form']['menu']['link']['menu_link_weight']),
+    );
+  }
 }
