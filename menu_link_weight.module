@@ -413,4 +413,3 @@ function menu_link_weight_hierarchical_select_ajax_commands_alter(&$commands, $c
     );
   }
 }
-
