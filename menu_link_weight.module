@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Replaces the menu link weight dropdown with a tabledrag widget.
@@ -193,7 +194,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
   // Add link on top, if needed.
   if ($add_link === TRUE) {
     $options['link_current'] = array(
-      'title' => '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE)  . '</strong> (' . t('current menu link to be created') . ')',
+      'title' => '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</strong> (' . t('current menu link to be created') . ')',
       'weight' => $weight,
       'db_weight' => NULL,
     );
@@ -256,12 +257,12 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
   // When calling menu_build_tree, be aware of core bug:
   // https://www.drupal.org/node/1477608
   $tree = menu_build_tree($menu_name, array(
-    'active_trail' => array($plid),
-    'only_active_trail' => FALSE,
-    'min_depth' => $limit,
-    'max_depth' => $limit,
-    'conditions' => array('plid' => $plid),
-  ));
+      'active_trail' => array($plid),
+      'only_active_trail' => FALSE,
+      'min_depth' => $limit,
+      'max_depth' => $limit,
+      'conditions' => array('plid' => $plid),
+    ));
   $menu_admin = FALSE;
   $trees[$menu_name] = $tree;
   return $tree;
@@ -305,7 +306,7 @@ function menu_link_weight_node_form_submit($form, &$form_state) {
       menu_link_save($link);
     }
   }
-  catch (Exception $e) {
+  catch(Exception$e) {
     $transaction->rollback();
     watchdog_exception('menu_link_weight', $e);
   }
@@ -385,10 +386,10 @@ function theme_menu_link_weight_reorder_element($variables) {
 
   // We can render our tabledrag table for output.
   $output = theme('table', array(
-    'header' => array(t('Name'), t('Weight')),
-    'rows' => $rows,
-    'attributes' => array('id' => $table_id),
-  ));
+      'header' => array(t('Name'), t('Weight')),
+      'rows' => $rows,
+      'attributes' => array('id' => $table_id),
+    ));
 
   // We now call the drupal_add_tabledrag() function in order to add the
   // tabledrag.js functionality onto our page.
@@ -408,7 +409,8 @@ function menu_link_weight_hierarchical_select_ajax_commands_alter(&$commands, $c
   if (isset($context['form']['menu']['link']['menu_link_weight'])) {
     $commands[] = array(
       'command' => 'menuLinkWeightHierarchicalSelectUpdate',
-      'output'  => drupal_render($context['form']['menu']['link']['menu_link_weight']),
+      'output' => drupal_render($context['form']['menu']['link']['menu_link_weight']),
     );
   }
 }
+
