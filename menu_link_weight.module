@@ -299,16 +299,23 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
  * Custom submit hook for node form which reorders menu link weights.
  */
 function menu_link_weight_node_form_submit($form, $form_state) {
+  // Save relevant menu_link_weight values into a separate variable.
+  if (isset($form_state['values']['menu']['menu_link_weight']) {
+    $weight = $form_state['values']['menu']['menu_link_weight'];
+    // Changing the weight of the current link will be handled in
+    // menu_link_weight_node_submit() instead!
+    unset($weight['link_current']);
+  }
+  else {
+    return;
+  }
+
+  // Set the new menu link weights.
   $transaction = db_transaction();
   try {
     // Because the form elements were keyed with the item ids from the database,
     // we can simply iterate through the submitted values.
-    foreach ($form_state['values']['menu']['menu_link_weight'] as $mlid => $info) {
-      if ($mlid == 'link_current') {
-        // Do nothing. Changing the weight of the current link will be handled
-        // in hook_node_submit() instead.
-        continue;
-      }
+    foreach ($weight as $mlid => $info) {
       $link = menu_link_load($mlid);
       $link['weight'] = $info['weight'];
       menu_link_save($link);
