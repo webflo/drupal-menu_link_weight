@@ -300,7 +300,7 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
  */
 function menu_link_weight_node_form_submit($form, $form_state) {
   // Save relevant menu_link_weight values into a separate variable.
-  if (isset($form_state['values']['menu']['menu_link_weight']) {
+  if (isset($form_state['values']['menu']['menu_link_weight'])) {
     $weight = $form_state['values']['menu']['menu_link_weight'];
     // Changing the weight of the current link will be handled in
     // menu_link_weight_node_submit() instead!
