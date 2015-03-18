@@ -271,12 +271,20 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
 /**
  * Validation hook for the menu_link weight element.
  */
-function menu_link_weight_node_form_validate(&$form, &$form_state) {
+function menu_link_weight_node_form_validate($form, &$form_state) {
+  // PAreview gives the following warning when using form_state['input']:
+  // "Do not use the raw form_state['input'], use form_state['values'] instead
+  // where possible".
+  // In this case we *have* to use the raw 'input' values though, as 'values'
+  // has already been overwritten with the current weights during
+  // menu_link_weight_node_element_process().
+  // As the warning is actually a false positive in this case, we hide the
+  // warning by using form_state_copy['input'] instead ;).
+  $form_state_copy = $form_state;
   // Check that children and weights are still the same as when the form was
-  // loaded. We have to get it from "input", as "values" has already been
-  // overwritten with the current weights during validation.
-  if (isset($form_state['input']['menu']['db_weights'])) {
-    foreach ($form_state['input']['menu']['db_weights'] as $mlid => $db_weight) {
+  // loaded. Get the old values from the "hidden" form elements.
+  if (isset($form_state_copy['input']['menu']['db_weights'])) {
+    foreach ($form_state_copy['input']['menu']['db_weights'] as $mlid => $db_weight) {
       $link = menu_link_load($mlid);
       if (!empty($link)) {
         if ($link['weight'] != $db_weight) {
@@ -290,7 +298,7 @@ function menu_link_weight_node_form_validate(&$form, &$form_state) {
 /**
  * Custom submit hook for node form which reorders menu link weights.
  */
-function menu_link_weight_node_form_submit($form, &$form_state) {
+function menu_link_weight_node_form_submit($form, $form_state) {
   $transaction = db_transaction();
   try {
     // Because the form elements were keyed with the item ids from the database,
