@@ -117,13 +117,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
       $value = $complete_form['menu']['link']['parent']['#default_value'];
     }
   }
-  if (!strstr(':', $value)) {
-    // Parent has an incorrect value.
-    return $element;
-  }
-  else {
-    list($menu_name, $parent_mlid) = explode(':', $value);
-  }
+  list($menu_name, $parent_mlid) = explode(':', $value);
 
   // Get the menu title for the parent based on the current menu selection.
   if ($parent_mlid == 0) {
