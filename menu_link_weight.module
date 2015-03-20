@@ -105,7 +105,16 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
     $value = reset($hs_selection);
   }
   else {
-    $value = isset($form_state['values']['menu']['parent']) && is_string($form_state['values']['menu']['parent']) ? $form_state['values']['menu']['parent'] : $complete_form['menu']['link']['parent']['#default_value'];
+    if (isset($form_state['values']['menu']['parent']) && is_array($form_state['values']['menu']['parent']) && sizeof($form_state['values']['menu']['parent']) == 1) {
+      // The menu_link_sync module transforms the parent value into an array.
+      $value = reset($form_state['values']['menu']['parent']);
+    }
+    elseif (isset($form_state['values']['menu']['parent']) && is_string($form_state['values']['menu']['parent'])) {
+      $value = $form_state['values']['menu']['parent'];
+    }
+    else {
+      $value = $complete_form['menu']['link']['parent']['#default_value'];
+    }
   }
   list($menu_name, $parent_mlid) = explode(':', $value);
 
@@ -121,7 +130,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   $element['#description'] = t('Set up the weight of the provided menu link within the %parent_menu_title menu.', array('%parent_menu_title' => $parent_menu_title));
 
   // Get the ID for the current menu link.
-  $current_mlid = isset($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
+  $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
   // Get the title for the current menu link.
   $new_item_title = isset($form_state['values']['menu']['link_title']) ? $form_state['values']['menu']['link_title'] : $complete_form['menu']['link']['link_title']['#default_value'];
 
