@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Web tests for  Menu Link Weight.
+ * Web tests for Menu Link Weight.
  */
 
 /**
@@ -16,8 +16,8 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Menu Link Weight',
-      'description' => 'Menu Link Weight',
-      'group' => ' Menu Link Weight',
+      'description' => 'Web tests for Menu Link Weight',
+      'group' => 'Menu Link Weight',
     );
   }
 
@@ -51,6 +51,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
       'description' => '',
       'title' => $title,
     );
+
     // Drupal prepends the menu name with "menu-".
     $this->menu_name = 'menu-' . $menu_name;
     $this->drupalPost('admin/structure/menu/add', $edit, t('Save'));
@@ -63,14 +64,13 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
     $this->assertResponse(200);
     $this->assertText(t('The block settings have been updated.'), 'Custom menu block was enabled');
-
   }
 
   /**
    * Test creating, editing, deleting menu links via node form widget.
    */
   public function testMenuFunctionality() {
-    // Enable Navigation menu as available menu.
+    // Enable the Navigation menu as available menu.
     $edit = array(
       'menu_options[navigation]' => 1,
     );
@@ -113,6 +113,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
         $mlid_filter_tips = $link['mlid'];
       }
     }
+
     // Edit the node and create a menu link.
     $edit = array(
       'menu[enabled]' => 1,
@@ -267,54 +268,6 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $this->assertMenuLink($item2['mlid'], array('weight' => -46));
     $this->assertMenuLink($item5['mlid'], array('weight' => -45));
     $this->assertMenuLink($mlid_add_content, array('weight' => -44));
-  }
-
-  /**
-   * Add a menu link using the menu module UI.
-   *
-   * @param int $plid
-   *   Parent menu link id.
-   * @param string $link
-   *   Link path.
-   * @param string $menu_name
-   *   Menu name.
-   *
-   * @return array
-   *   Menu link created.
-   */
-  protected function addMenuLink($plid = 0, $link = '<front>', $menu_name = 'navigation', $expanded = TRUE) {
-    // View add menu link page.
-    $this->drupalGet("admin/structure/menu/manage/$menu_name/add");
-    $this->assertResponse(200);
-
-    $title = '!link_' . $this->randomName(16);
-    $edit = array(
-      'link_path' => $link,
-      'link_title' => $title,
-      'description' => '',
-      // Use this to disable the menu and test.
-      'enabled' => TRUE,
-      'expanded' => $expanded,
-      'parent' => $menu_name . ':' . $plid,
-      'weight' => '0',
-    );
-
-    // Add menu link.
-    $this->drupalPost(NULL, $edit, t('Save'));
-    $this->assertResponse(200);
-    // Unlike most other modules, there is no confirmation message displayed.
-    $this->assertText($title, 'Menu link was added');
-
-    $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => $title))->fetchAssoc();
-    $this->assertTrue(t('Menu link was found in database.'));
-    $this->assertMenuLink($item['mlid'], array(
-      'menu_name' => $menu_name,
-      'link_path' => $link,
-      'has_children' => 0,
-      'plid' => $plid,
-    ));
-
-    return $item;
   }
 
   /**

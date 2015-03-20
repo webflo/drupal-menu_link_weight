@@ -3,4 +3,3 @@ dependencies[] = menu
 files[]        = tests/menu_link_weight.test
 description    = "Replaces the menu link weight dropdown with a tabledrag widget"
 name           = "Menu Link Weight"
-package        = "Menu Link Weight"

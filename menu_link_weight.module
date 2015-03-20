@@ -28,11 +28,14 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
     // Only allow users with "administer menu" permissions.
     return;
   }
+
   // Remove the "weight" widget.
   unset($form['menu']['link']['weight']);
+
   // Add submission/validation handlers.
   $form['#validate'][] = 'menu_link_weight_node_form_validate';
   $form['#submit'][] = 'menu_link_weight_node_form_submit';
+
   // Add the Menu Link weight fieldset.
   $form['menu']['link']['menu_link_weight'] = array(
     '#tree' => TRUE,
@@ -46,6 +49,7 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
     // the #menu_link_weight_process flag to TRUE.
     '#menu_link_weight_process' => TRUE,
   );
+
   // Define the "db_weights" element, which will hold hidden fields with
   // the values of the menu links in the database. Upon validation we will
   // check whether the weights are still the same as when the form was
@@ -56,6 +60,7 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
   if (module_exists('hierarchical_select')) {
     $form['#attached']['js'][] = drupal_get_path('module', 'menu_link_weight') . '/menu_link_weight.hierarchical_select.js';
   }
+
   // Define the AJAX callback for changes in the Parent element.
   $form['menu']['link']['parent']['#ajax'] = array(
     'callback' => 'menu_link_weight_parent_ajax_callback',
@@ -104,7 +109,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   }
   list($menu_name, $parent_mlid) = explode(':', $value);
 
-  // Get menu title for the parent based on the current menu selection.
+  // Get the menu title for the parent based on the current menu selection.
   if ($parent_mlid == 0) {
     $menu = menu_load($menu_name);
     $parent_menu_title = $menu['title'];
@@ -119,6 +124,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   $current_mlid = isset($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
   // Get the title for the current menu link.
   $new_item_title = isset($form_state['values']['menu']['link_title']) ? $form_state['values']['menu']['link_title'] : $complete_form['menu']['link']['link_title']['#default_value'];
+
   // Get the options array we will use to build the form elements for every
   // menu link.
   $options = _menu_link_weight_get_options($menu_name, $parent_mlid, $current_mlid, $new_item_title);
@@ -265,7 +271,7 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
     ));
   $menu_admin = FALSE;
   $trees[$menu_name] = $tree;
-  return $tree;
+  return $trees[$menu_name];
 }
 
 /**
@@ -299,23 +305,16 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
  * Custom submit hook for node form which reorders menu link weights.
  */
 function menu_link_weight_node_form_submit($form, $form_state) {
-  // Save relevant menu_link_weight values into a separate variable.
-  if (isset($form_state['values']['menu']['menu_link_weight'])) {
-    $weight = $form_state['values']['menu']['menu_link_weight'];
-    // Changing the weight of the current link will be handled in
-    // menu_link_weight_node_submit() instead!
-    unset($weight['link_current']);
-  }
-  else {
-    return;
-  }
-
-  // Set the new menu link weights.
   $transaction = db_transaction();
   try {
     // Because the form elements were keyed with the item ids from the database,
     // we can simply iterate through the submitted values.
-    foreach ($weight as $mlid => $info) {
+    foreach ($form_state['values']['menu']['menu_link_weight'] as $mlid => $info) {
+      if ($mlid == 'link_current') {
+        // Do nothing. Changing the weight of the current link will be handled
+        // in hook_node_submit() instead.
+        continue;
+      }
       $link = menu_link_load($mlid);
       $link['weight'] = $info['weight'];
       menu_link_save($link);
