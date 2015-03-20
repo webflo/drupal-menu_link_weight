@@ -210,7 +210,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
   // Add link on top, if needed.
   if ($add_link === TRUE) {
     $options['link_current'] = array(
-      'title' => '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('current menu link to be created') . ')',
+      'title' => '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('provided menu link') . ')',
       'weight' => $weight,
       'db_weight' => NULL,
     );
@@ -222,7 +222,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
     // Change the title & ID for the current menu link.
     if ($data['link']['mlid'] == $current_mlid) {
       $id = 'link_current';
-      $title = '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('current menu link') . ')';
+      $title = '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('provided menu link') . ')';
     }
     else {
       $id = $data['link']['mlid'];

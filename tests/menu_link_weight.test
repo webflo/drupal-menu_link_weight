@@ -138,7 +138,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $this->assertMenuLink($mlid_filter_tips, array('weight' => -48));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertText('(' . t('current menu link') . ')');
+    $this->assertText('(' . t('provided menu link') . ')');
     $this->assertRaw('Set up the weight of the provided menu link within the <em class="placeholder">Navigation</em> menu');
     $this->assertOptionSelected('edit-menu-menu-link-weight-link-current-weight', -49, 'Menu weight correct in edit form');
 
@@ -191,7 +191,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $node2 = $this->drupalGetNodeByTitle($node2_title);
 
     $this->drupalGet('node/' . $node2->nid . '/edit');
-    $this->assertText('(' . t('current menu link') . ')');
+    $this->assertText('(' . t('provided menu link') . ')');
     $this->assertOptionSelected('edit-menu-menu-link-weight-link-current-weight', -48, 'Menu weight correct in edit form');
 
     // Assert that the item is placed on top of the list if no other options
