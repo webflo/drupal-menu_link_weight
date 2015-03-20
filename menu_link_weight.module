@@ -57,8 +57,9 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
   $form['menu']['link']['db_weights'] = array(
     '#tree' => TRUE,
   );
+  $form['#attached']['js'][] = drupal_get_path('module', 'menu_link_weight') . '/js/menu_link_weight.js';
   if (module_exists('hierarchical_select')) {
-    $form['#attached']['js'][] = drupal_get_path('module', 'menu_link_weight') . '/menu_link_weight.hierarchical_select.js';
+    $form['#attached']['js'][] = drupal_get_path('module', 'menu_link_weight') . '/js/menu_link_weight.hierarchical_select.js';
   }
 
   // Define the AJAX callback for changes in the Parent element.
@@ -209,7 +210,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
   // Add link on top, if needed.
   if ($add_link === TRUE) {
     $options['link_current'] = array(
-      'title' => '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</strong> (' . t('current menu link to be created') . ')',
+      'title' => '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('current menu link to be created') . ')',
       'weight' => $weight,
       'db_weight' => NULL,
     );
@@ -221,7 +222,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
     // Change the title & ID for the current menu link.
     if ($data['link']['mlid'] == $current_mlid) {
       $id = 'link_current';
-      $title = '<strong>' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</strong> (' . t('current menu link') . ')';
+      $title = '<strong><span class="menu-link-weight-link-current">' . truncate_utf8(check_plain($new_item_title), 30, TRUE, FALSE) . '</span></strong> (' . t('current menu link') . ')';
     }
     else {
       $id = $data['link']['mlid'];
