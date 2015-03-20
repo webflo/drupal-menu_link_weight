@@ -389,6 +389,7 @@ function theme_menu_link_weight_reorder_element($variables) {
       // Make the row which contains the menu link for the node we are editing
       // highlight, by using the "warning" class.
       $class[] = 'warning';
+      $class[] = 'menu-link-weight-link-current-row';
     }
 
     // We are now ready to add each element of our $form data to the $rows
