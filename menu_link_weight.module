@@ -106,7 +106,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
     $value = reset($hs_selection);
   }
   else {
-    if (isset($form_state['values']['menu']['parent']) && is_array($form_state['values']['menu']['parent']) && sizeof($form_state['values']['menu']['parent']) == 1) {
+    if (isset($form_state['values']['menu']['parent']) && is_array($form_state['values']['menu']['parent']) && count($form_state['values']['menu']['parent']) == 1) {
       // The menu_link_sync module transforms the parent value into an array.
       $value = reset($form_state['values']['menu']['parent']);
     }

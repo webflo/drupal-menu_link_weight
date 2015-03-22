@@ -1,6 +1,7 @@
 <?php
 /**
- * @file Functionality related to reordering of options by other modules.
+ * @file
+ * Functionality related to reordering of options by other modules.
  */
 
 /**

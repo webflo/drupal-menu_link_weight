@@ -1,5 +1,6 @@
 /**
- * @file Menu Link Weight Javascript functionality.
+ * @file
+ * Menu Link Weight Javascript functionality.
  */
 
 (function ($) {

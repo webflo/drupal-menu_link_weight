@@ -1,5 +1,6 @@
 /**
- * @file Hierarchical select integration.
+ * @file
+ * Hierarchical select integration.
  */
 
 (function($) {
@@ -9,7 +10,7 @@
       // Remove the "has-no-children" class so that even selecting a parent
       // item without any children will trigger an AJAX update (and load an
       // empty menu link weights list).
-      $('.hierarchical-select-wrapper .has-no-children').removeClass('has-no-children');
+      $('.hierarchical-select-wrapper .has-no-children', context).removeClass('has-no-children');
     }
   };
 
