@@ -175,7 +175,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  */
 function _menu_link_sync_get_parent_value_from_element($parent_element, $form_state) {
   $value = FALSE;
-  if ($element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
+  if ($parent_element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
     // Added for compatibility with the Hierarchical Select module.
     $hsid = _hs_process_determine_hsid($parent_element, $form_state);
     list($hs_selection, $db_selection) = _hierarchical_select_process_calculate_selections($parent_element, $hsid, $form_state);
