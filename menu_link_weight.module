@@ -100,8 +100,8 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   $options = array();
 
   // Find out which parent to select after loading (or AJAX reloading) the form.
-  $element = $complete_form['menu']['link']['parent'];
-  $value = _menu_link_sync_get_parent_value_from_element($element, $form_state);
+  $parent_element = $complete_form['menu']['link']['parent'];
+  $value = _menu_link_sync_get_parent_value_from_element($parent_element, $form_state);
   if (strstr($value, ':')) {
     list($menu_name, $parent_mlid) = explode(':', $value);
   }
@@ -173,7 +173,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  * @return string
  *   Menu link
  */
-function _menu_link_sync_get_parent_value_from_element($element, $form_state) {
+function _menu_link_sync_get_parent_value_from_element($parent_element, $form_state) {
   $value = FALSE;
   if ($element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
     // Added for compatibility with the Hierarchical Select module.
