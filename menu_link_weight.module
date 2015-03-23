@@ -283,7 +283,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
 function _menu_link_weight_get_tree($menu_name, $plid) {
   global $menu_admin;
   $trees = &drupal_static(__FUNCTION__);
-  if (isset($trees[$menu_name])) {
+  if (isset($trees[$menu_name][$plid])) {
     return $trees[$menu_name][$plid];
   }
   if ($plid != 0) {
