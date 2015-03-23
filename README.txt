@@ -10,8 +10,9 @@ editing relative to its sibling links. You can also reorder the sibling links
 themselves if like.
 
 Upon node submission, the weights of all the children of the selected parents
-will be internally reordered from -50 to -49, to -48 etc. Note: this will
-overwrite existing weights for children of the selected parent item!
+that the user has access to will be internally reordered from -50 to -49, to
+-48 etc. Note: this will overwrite existing weights for children of the
+selected parent item!
 
 With "row weights" hidden, content editors can now ignore the numerical weight
 values and instead see the position of a menu link relative to other links in

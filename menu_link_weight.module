@@ -128,7 +128,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
     $link = menu_link_load($parent_mlid);
     $parent_menu_title = $link['link_title'];
   }
-  $element['#description'] = t('Set up the weight of the provided menu link within the %parent_menu_title menu.', array('%parent_menu_title' => $parent_menu_title));
+  $element['#description'] = t('Set the weight of the links within the %parent_menu_title menu by dragging them up or down.', array('%parent_menu_title' => $parent_menu_title));
 
   // Get the ID for the current menu link.
   $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
@@ -251,7 +251,7 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
  *   Parent link ID.
  *
  * @return array
- *   List of all items under the plid.
+ *   List of all items under the plid (that the user has access to).
  */
 function _menu_link_weight_get_tree($menu_name, $plid) {
   global $menu_admin;
@@ -294,13 +294,10 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
   // In this case we *have* to use the raw 'input' values though, as 'values'
   // has already been overwritten with the current weights during
   // menu_link_weight_node_element_process().
-  // As the warning is actually a false positive in this case, we hide the
-  // warning by using form_state_copy['input'] instead ;).
-  $form_state_copy = $form_state;
-  // Check that children and weights are still the same as when the form was
-  // loaded. Get the old values from the "hidden" form elements.
-  if (isset($form_state_copy['input']['menu']['db_weights'])) {
-    foreach ($form_state_copy['input']['menu']['db_weights'] as $mlid => $db_weight) {
+  if (isset($form_state['input']['menu']['db_weights'])) {
+    // Check that children and weights are still the same as when the form was
+    // loaded. Get the old values from the "hidden" form elements.
+    foreach ($form_state['input']['menu']['db_weights'] as $mlid => $db_weight) {
       $link = menu_link_load($mlid);
       if (!empty($link)) {
         if ($link['weight'] != $db_weight) {
@@ -313,6 +310,9 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
 
 /**
  * Custom submit hook for node form which reorders menu link weights.
+ *
+ * Note: this wil not reorder links that the current user does not have access
+ * to (ie. links to access-controlled nodes).
  */
 function menu_link_weight_node_form_submit($form, $form_state) {
   $transaction = db_transaction();
