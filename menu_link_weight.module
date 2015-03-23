@@ -284,7 +284,7 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
   global $menu_admin;
   $trees = &drupal_static(__FUNCTION__);
   if (isset($trees[$menu_name])) {
-    return $trees[$menu_name];
+    return $trees[$menu_name][$plid];
   }
   if ($plid != 0) {
     $link = menu_Link_load($plid);
@@ -307,7 +307,7 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
       'conditions' => array('plid' => $plid),
     ));
   $menu_admin = FALSE;
-  $trees[$menu_name] = $tree;
+  $trees[$menu_name][$plid] = $tree;
   return $trees[$menu_name];
 }
 
