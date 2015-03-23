@@ -308,7 +308,7 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
     ));
   $menu_admin = FALSE;
   $trees[$menu_name][$plid] = $tree;
-  return $trees[$menu_name];
+  return $trees[$menu_name][$plid];
 }
 
 /**
