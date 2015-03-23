@@ -100,24 +100,14 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   $options = array();
 
   // Find out which parent to select after loading (or AJAX reloading) the form.
-  if ($complete_form['menu']['link']['parent']['#type'] == 'hierarchical_select') {
-    // Added for compatibility with the Hierarchical Select module.
-    $hs_selection = _hierarchical_select_process_get_hs_selection($complete_form['menu']['link']['parent']);
-    $value = reset($hs_selection);
+  $element = $complete_form['menu']['link']['parent'];
+  $value = _menu_link_sync_get_parent_value_from_element($element, $form_state);
+  if (strstr($value, ':')) {
+    list($menu_name, $parent_mlid) = explode(':', $value);
   }
   else {
-    if (isset($form_state['values']['menu']['parent']) && is_array($form_state['values']['menu']['parent']) && count($form_state['values']['menu']['parent']) == 1) {
-      // The menu_link_sync module transforms the parent value into an array.
-      $value = reset($form_state['values']['menu']['parent']);
-    }
-    elseif (isset($form_state['values']['menu']['parent']) && is_string($form_state['values']['menu']['parent'])) {
-      $value = $form_state['values']['menu']['parent'];
-    }
-    else {
-      $value = $complete_form['menu']['link']['parent']['#default_value'];
-    }
+    return $element;
   }
-  list($menu_name, $parent_mlid) = explode(':', $value);
 
   // Get the menu title for the parent based on the current menu selection.
   if ($parent_mlid == 0) {
@@ -168,6 +158,43 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
     }
   }
   return $element;
+}
+
+/**
+ * Gets the menu link parent value from the form.
+ *
+ * Helper function for menu link weight process callback.
+ *
+ * @param array $element
+ *   Menu link parent form element.
+ * @param array $form_state
+ *   Form state array.
+ *
+ * @return string
+ *   Menu link
+ */
+function _menu_link_sync_get_parent_value_from_element($element, $form_state) {
+  $value = FALSE;
+  if ($element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
+    // Added for compatibility with the Hierarchical Select module.
+    $hsid = _hs_process_determine_hsid($element, $form_state);
+    list($hs_selection, $db_selection) = _hierarchical_select_process_calculate_selections($element, $hsid, $form_state);
+    $value = $hs_selection;
+  }
+  else {
+    if (isset($form_state['values']['menu']['parent'])) {
+      $value = $form_state['values']['menu']['parent'];
+    }
+    else {
+      $value = (!empty($element['#value'])) ? $element['#value'] : $element['#default_value'];
+    }
+  }
+  // The menu_link_sync and hierarchical_select modules transform the parent
+  // value into an array.
+  if (is_array($value) && isset($value[0])) {
+    $value = $value[0];
+  }
+  return $value;
 }
 
 /**
