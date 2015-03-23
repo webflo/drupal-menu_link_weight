@@ -177,8 +177,8 @@ function _menu_link_sync_get_parent_value_from_element($parent_element, $form_st
   $value = FALSE;
   if ($element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
     // Added for compatibility with the Hierarchical Select module.
-    $hsid = _hs_process_determine_hsid($element, $form_state);
-    list($hs_selection, $db_selection) = _hierarchical_select_process_calculate_selections($element, $hsid, $form_state);
+    $hsid = _hs_process_determine_hsid($parent_element, $form_state);
+    list($hs_selection, $db_selection) = _hierarchical_select_process_calculate_selections($parent_element, $hsid, $form_state);
     $value = $hs_selection;
   }
   else {
@@ -186,7 +186,7 @@ function _menu_link_sync_get_parent_value_from_element($parent_element, $form_st
       $value = $form_state['values']['menu']['parent'];
     }
     else {
-      $value = (!empty($element['#value'])) ? $element['#value'] : $element['#default_value'];
+      $value = (!empty($parent_element['#value'])) ? $parent_element['#value'] : $parent_element['#default_value'];
     }
   }
   // The menu_link_sync and hierarchical_select modules transform the parent
