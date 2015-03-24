@@ -1,5 +1,5 @@
 core           = "7.x"
 dependencies[] = menu
-files[]        = tests/menu_link_weight.test
+files[]        = menu_link_weight.test
 description    = "Replaces the menu link weight dropdown with a tabledrag widget"
 name           = "Menu Link Weight"
