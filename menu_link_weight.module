@@ -140,7 +140,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
     $link = menu_link_load($plid);
     $parent_menu_title = $link['link_title'];
   }
-  $element['#description'] = t('Set the weight of the links within the %parent_menu_title menu by dragging them up or down.', array('%parent_menu_title' => $parent_menu_title));
+  $element['#description'] = t('Change the weight of the links within the %parent_menu_title menu by dragging the items up/down.', array('%parent_menu_title' => $parent_menu_title));
 
   // Get the ID for the current menu link.
   $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
@@ -457,11 +457,13 @@ function theme_menu_link_weight_reorder_element($variables) {
     // To support the tabledrag behaviour, we need to assign each row of the
     // table a class attribute of 'draggable'.
     $class = array('draggable');
+    $no_striping = FALSE;
     if ($id == 'link_current') {
       // Make the row which contains the menu link for the node we are editing
       // highlight, by using the "warning" class.
       $class[] = 'warning';
       $class[] = 'menu-link-weight-link-current-row';
+      $no_striping = TRUE;
     }
 
     // We are now ready to add each element of our $form data to the $rows
@@ -474,6 +476,7 @@ function theme_menu_link_weight_reorder_element($variables) {
         drupal_render($element[$id]['weight']),
       ),
       'class' => $class,
+      'no_striping' => $no_striping,
     );
   }
 
