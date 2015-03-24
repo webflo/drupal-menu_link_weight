@@ -123,9 +123,9 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
 
   // Find out which parent to select after loading (or AJAX reloading) the form.
   $parent_element = $complete_form['menu']['link']['parent'];
-  $value = _menu_link_weight_get_parent_value_from_element($parent_element, $form_state);
-  if (strstr($value, ':')) {
-    list($menu_name, $plid) = explode(':', $value);
+  $parent_value = _menu_link_weight_get_parent_value_from_element($parent_element, $form_state);
+  if (strstr($parent_value, ':')) {
+    list($menu_name, $plid) = explode(':', $parent_value);
   }
   else {
     return $element;
@@ -151,8 +151,8 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   // menu link.
   $options = _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_item_title);
   // Allow other modules to reorder the options, if applicable.
-  if (!empty($form_state['menu_link_weight_relative_position'])) {
-    $options = _menu_link_weight_reorder_options($options, $form_state['menu_link_weight_relative_position']);
+  if (!empty($form_state['menu_link_weight_relative_position'][$parent_value])) {
+    $options = _menu_link_weight_reorder_options($options, $form_state['menu_link_weight_relative_position'][$parent_value]);
   }
   // Build the form elements using the options array.
   foreach ($options as $mlid => $info) {
