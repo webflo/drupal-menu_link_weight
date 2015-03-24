@@ -150,6 +150,10 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $this->drupalPostAJAX('node/' . $node->nid . '/edit', $edit, 'menu[parent]');
     $this->assertRaw('Set the weight of the links within the <em class="placeholder">Add content</em> menu');
 
+    // Test graceful degradation.
+    $this->drupalPost('node/' . $node->nid . '/edit', $edit, menu_link_weight_get_button_text());
+    $this->assertRaw('Set the weight of the links within the <em class="placeholder">Add content</em> menu');
+
     // Test "editing lock".
     $edit = array(
       'menu[enabled]' => 1,
