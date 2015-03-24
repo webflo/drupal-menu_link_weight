@@ -195,7 +195,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  * @return string
  *   Menu link
  */
-function _menu_link_weight_get_parent_value_from_element($parent_element, array $form_state) {
+function _menu_link_weight_get_parent_value_from_element(array $parent_element, array $form_state) {
   $value = FALSE;
   if ($parent_element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
     // Added for compatibility with the Hierarchical Select module.
