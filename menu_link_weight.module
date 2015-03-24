@@ -282,10 +282,6 @@ function _menu_link_weight_get_options($menu_name, $plid, $current_mlid, $new_it
  */
 function _menu_link_weight_get_tree($menu_name, $plid) {
   global $menu_admin;
-  $trees = &drupal_static(__FUNCTION__);
-  if (isset($trees[$menu_name][$plid])) {
-    return $trees[$menu_name][$plid];
-  }
   if ($plid != 0) {
     $link = menu_Link_load($plid);
     $limit = $link['depth'] + 1;
@@ -297,18 +293,19 @@ function _menu_link_weight_get_tree($menu_name, $plid) {
   // We indicate that a menu administrator will be running the menu access
   // check.
   $menu_admin = TRUE;
-  // When calling menu_build_tree, be aware of core bug:
-  // https://www.drupal.org/node/1477608
   $tree = menu_build_tree($menu_name, array(
       'active_trail' => array($plid),
       'only_active_trail' => FALSE,
       'min_depth' => $limit,
       'max_depth' => $limit,
       'conditions' => array('plid' => $plid),
+      // To prevent core bug: https://www.drupal.org/node/1477608.
+      // We do not want this call to be cached (which is partly done based on
+      // the hash of the parameters), so we put a unique ID in the parameters.
+      'do_not_cache' => uniqid(),
     ));
   $menu_admin = FALSE;
-  $trees[$menu_name][$plid] = $tree;
-  return $trees[$menu_name][$plid];
+  return $tree;
 }
 
 /**
