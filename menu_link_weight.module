@@ -67,6 +67,28 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
     'callback' => 'menu_link_weight_parent_ajax_callback',
     'wrapper' => 'menu-link-weight-wrapper',
   );
+
+  // This next button will not be displayed if JS is enabled.
+  $form['menu']['link']['menu_link_weight_nojs'] = array(
+    '#type' => 'submit',
+    '#value' => menu_link_weight_get_button_text(),
+    '#prefix' => '<noscript>',
+    '#suffix' => '</noscript>',
+    // No need to validate when submitting this.
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array('menu_link_weight_node_form_submit'),
+  );
+}
+
+/**
+ * Gets the name for the "No-Javascript" button we want to use.
+ *
+ * @return string
+ *   Translated text to show on the button.
+ */
+function menu_link_weight_get_button_text() {
+  return t('Change parent (update list of weights)');
 }
 
 /**
@@ -357,7 +379,14 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
  * Note: this wil not reorder links that the current user does not have access
  * to (ie. links to access-controlled nodes).
  */
-function menu_link_weight_node_form_submit($form, $form_state) {
+function menu_link_weight_node_form_submit($form, &$form_state) {
+  // For graceful JS degradation.
+  if ($form_state['triggering_element']['#value'] == menu_link_weight_get_button_text()) {
+    $form_state['values']['menu']['parent'] = $form_state['input']['menu']['parent'];
+    $form_state['rebuild'] = TRUE;
+    return;
+  }
+
   $transaction = db_transaction();
   try {
     // Because the form elements were keyed with the item ids from the database,

@@ -7,7 +7,8 @@ for menu links in the node form provided by Drupal Core with a tabledrag widget.
 Upon selection of a parent, a tabledrag widget will be loaded via AJAX that
 will allow you to reorder the weight of the menu link for the node you are
 editing relative to its sibling links. You can also reorder the sibling links
-themselves if like.
+themselves if like. There will be graceful degradation if Javascript is not
+available.
 
 Upon node submission, the weights of all the children of the selected parents
 that the user has access to will be internally reordered from -50 to -49, to
@@ -30,6 +31,7 @@ No special requirements.
 
 INSTALLATION
 ------------
+
 Install as you would normally install a contributed Drupal module. See:
 https://drupal.org/documentation/install/modules-themes/modules-7
 for further information.
