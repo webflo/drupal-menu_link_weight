@@ -7,7 +7,7 @@
   /**
    * Automatically update the current link title in the menu link weight list.
    */
-  Drupal.behaviors.menuLinkSyncAutomaticTitle = {
+  Drupal.behaviors.menuLinkWeightAutomaticTitle = {
     attach: function (context) {
       $('fieldset.menu-link-form', context).each(function () {
         var $checkbox = $('.form-item-menu-enabled input', this);
@@ -15,11 +15,11 @@
         var $current_selection = $('.menu-link-weight-link-current', context);
         // If there is no title, take over the title of the link.
         if ($current_selection.html() == '') {
-          $current_selection.html($link_title.val());
+          $current_selection.html($link_title.val().substring(0, 30));
         }
         // Take over any link title change.
         $link_title.keyup(function () {
-          $current_selection.html($link_title.val());
+          $current_selection.html($link_title.val().substring(0, 30));
         });
       });
     }
