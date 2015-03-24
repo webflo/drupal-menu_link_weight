@@ -123,7 +123,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
 
   // Find out which parent to select after loading (or AJAX reloading) the form.
   $parent_element = $complete_form['menu']['link']['parent'];
-  $value = _menu_link_sync_get_parent_value_from_element($parent_element, $form_state);
+  $value = _menu_link_weight_get_parent_value_from_element($parent_element, $form_state);
   if (strstr($value, ':')) {
     list($menu_name, $plid) = explode(':', $value);
   }
@@ -187,7 +187,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  *
  * Helper function for menu link weight process callback.
  *
- * @param array $element
+ * @param array $parent_element
  *   Menu link parent form element.
  * @param array $form_state
  *   Form state array.
@@ -195,7 +195,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
  * @return string
  *   Menu link
  */
-function _menu_link_sync_get_parent_value_from_element($parent_element, $form_state) {
+function _menu_link_weight_get_parent_value_from_element($parent_element, array $form_state) {
   $value = FALSE;
   if ($parent_element['#type'] == 'hierarchical_select' && function_exists('_hs_process_determine_hsid') && function_exists('_hierarchical_select_process_calculate_selections')) {
     // Added for compatibility with the Hierarchical Select module.
@@ -341,7 +341,7 @@ function menu_link_weight_node_form_validate($form, &$form_state) {
   // has already been overwritten with the current weights during
   // menu_link_weight_node_element_process().
   $parent_element = $form['menu']['link']['parent'];
-  $value = _menu_link_sync_get_parent_value_from_element($parent_element, $form_state);
+  $value = _menu_link_weight_get_parent_value_from_element($parent_element, $form_state);
   if (strstr($value, ':') && !empty($form_state['input']['menu']['menu_link_weight'])) {
     list($menu_name, $plid) = explode(':', $value);
     // Loop through submitted weights and confirm that the parent link/menu
