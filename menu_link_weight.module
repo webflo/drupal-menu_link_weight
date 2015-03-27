@@ -82,6 +82,25 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ * Add an anchor tag so we can link to a menu item directly from the node form.
+ *
+ * @see menu_link_weight_node_element_process
+ */
+function menu_link_weight_form_menu_overview_form_alter(&$form, &$form_state) {
+  foreach (element_children($form) as $element) {
+    if (substr($element, 0, 5) == 'mlid:') {
+      $mlid = $form[$element]['#item']['mlid'];
+      // Add an offset of 60 pixels to the anchor tag so it doesn't "headbutt"
+      // the top of the screen.
+      $html = '<span style="display: inline-block; margin-top: -60px; padding-top: 60px;" id="menu-link-weight-mlid-' .  $mlid . '"></span>';
+      $form[$element]['title']['#prefix'] = isset($form[$element]['title']['#prefix']) ? $form[$element]['title']['#prefix'] . $html : $html;
+    }
+  }
+}
+
+
+/**
  * Gets the name for the "No-Javascript" button we want to use.
  *
  * @return string
@@ -134,16 +153,22 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   // Get the menu title for the parent based on the current menu selection.
   if ($plid == 0) {
     $menu = menu_load($menu_name);
-    $parent_menu_title = $menu['title'];
+    $parent_menu_link = l($menu['title'], 'admin/structure/menu/manage/' . $menu_name);
   }
   else {
     $link = menu_link_load($plid);
-    $parent_menu_title = $link['link_title'];
+    $parent_menu_link = l($link['link_title'], 'admin/structure/menu/manage/' . $menu_name, array(
+      'attributes' => array(
+        'target' => '_blank',
+      ),
+      'fragment' => 'menu-link-weight-mlid-' . $plid,
+      'html' => TRUE,
+    ));
   }
-  $element['#description'] = t('Change the weight of the links within the %parent_menu_title menu by dragging the items up/down.', array('%parent_menu_title' => $parent_menu_title));
+  $element['#description'] = t('Change the weight of the links within the !parent_menu_link menu by dragging the items up/down.', array('!parent_menu_link' => filter_xss_admin($parent_menu_link)));
 
   // Get the ID for the current menu link.
-  $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
+  $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu'] ['link']['mlid']['#value'] : NULL;
   // Get the title for the current menu link.
   $new_item_title = isset($form_state['values']['menu']['link_title']) ? $form_state['values']['menu']['link_title'] : $complete_form['menu']['link']['link_title']['#default_value'];
 
