@@ -82,8 +82,9 @@ function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- * Add an anchor tag so we can link to a menu item directly from the node form.
+ * Implements hook_form_FORM_ID_alter() for menu_overview_form().
+ *
+ * Adds an anchor tag so we can link to a menu item directly from the node form.
  *
  * @see menu_link_weight_node_element_process
  */
@@ -93,7 +94,7 @@ function menu_link_weight_form_menu_overview_form_alter(&$form, &$form_state) {
       $mlid = $form[$element]['#item']['mlid'];
       // Add an offset of 60 pixels to the anchor tag so it doesn't "headbutt"
       // the top of the screen.
-      $html = '<span style="display: inline-block; margin-top: -60px; padding-top: 60px;" id="menu-link-weight-mlid-' .  $mlid . '"></span>';
+      $html = '<span style="display: inline-block; margin-top: -60px; padding-top: 60px;" id="menu-link-weight-mlid-' . $mlid . '"></span>';
       $form[$element]['title']['#prefix'] = isset($form[$element]['title']['#prefix']) ? $form[$element]['title']['#prefix'] . $html : $html;
     }
   }
@@ -168,7 +169,7 @@ function menu_link_weight_node_element_process($element, &$form_state, &$complet
   $element['#description'] = t('Change the weight of the links within the !parent_menu_link menu by dragging the items up/down.', array('!parent_menu_link' => filter_xss_admin($parent_menu_link)));
 
   // Get the ID for the current menu link.
-  $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu'] ['link']['mlid']['#value'] : NULL;
+  $current_mlid = !empty($complete_form['menu']['link']['mlid']['#value']) ? $complete_form['menu']['link']['mlid']['#value'] : NULL;
   // Get the title for the current menu link.
   $new_item_title = isset($form_state['values']['menu']['link_title']) ? $form_state['values']['menu']['link_title'] : $complete_form['menu']['link']['link_title']['#default_value'];
 

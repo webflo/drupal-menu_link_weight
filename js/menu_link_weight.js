@@ -22,7 +22,8 @@
         $link_title.keyup(function () {
           $current_selection.html($link_title.val().substring(0, 30));
         });
-       $node_title.keyup(function () {
+        // Also update on node title change, as this may update the link title.
+        $node_title.keyup(function () {
           $current_selection.html($link_title.val().substring(0, 30));
         });
       });
