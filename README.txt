@@ -7,7 +7,7 @@ for menu links in the node form provided by Drupal Core with a tabledrag widget.
 Upon selection of a parent, a tabledrag widget will be loaded via AJAX that
 will allow you to reorder the weight of the menu link for the node you are
 editing relative to its sibling links. You can also reorder the sibling links
-themselves if like. There will be graceful degradation if Javascript is not
+themselves if you like. There will be graceful degradation if Javascript is not
 available.
 
 Upon node submission, the weights of all the children of the selected parents
