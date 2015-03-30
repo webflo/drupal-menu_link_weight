@@ -226,7 +226,8 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     // Test the custom tree reordering functionality:
     module_enable(array('menu_link_weight_test'));
     // Insert the new link above item 2:
-    variable_set('menu_link_weight_relative_position', 'above_' . $item2['mlid']);
+    variable_set('menu_link_weight_test_parent_value', 'navigation:0');
+    variable_set('menu_link_weight_test_relative_position', 'above_' . $item2['mlid']);
     $node4_title = $this->randomName();
     $language = LANGUAGE_NONE;
     $edit = array(
@@ -251,7 +252,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
     $this->assertMenuLink($item2['mlid'], array('weight' => -46));
     $this->assertMenuLink($mlid_add_content, array('weight' => -45));
 
-    variable_set('menu_link_weight_relative_position', 'below_' . $item2['mlid']);
+    variable_set('menu_link_weight_test_relative_position', 'below_' . $item2['mlid']);
     $node5_title = $this->randomName();
     $language = LANGUAGE_NONE;
     $edit = array(
