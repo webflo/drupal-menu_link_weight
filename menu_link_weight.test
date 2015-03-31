@@ -139,7 +139,7 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
 
     $this->drupalGet('node/' . $node->nid . '/edit');
     $this->assertText('(' . t('provided menu link') . ')');
-    $this->assertText('Change the weight of the links within the <em class="placeholder">Navigation</em> menu');
+    $this->assertText('Change the weight of the links within the Navigation menu');
     $this->assertOptionSelected('edit-menu-menu-link-weight-link-current-weight', -49, 'Menu weight correct in edit form');
 
     // Test AJAX functionality.
@@ -148,11 +148,11 @@ class MenuLinkWeightTest extends DrupalWebTestCase {
       'menu[parent]' => 'navigation:' . $mlid_add_content,
     );
     $this->drupalPostAJAX('node/' . $node->nid . '/edit', $edit, 'menu[parent]');
-    $this->assertText'Change the weight of the links within the <em class="placeholder">Add content</em> menu');
+    $this->assertText('Change the weight of the links within the Add content menu');
 
     // Test graceful degradation.
     $this->drupalPost('node/' . $node->nid . '/edit', $edit, menu_link_weight_get_button_text());
-    $this->assertText('Change the weight of the links within the <em class="placeholder">Add content</em> menu');
+    $this->assertText('Change the weight of the links within the Add content menu');
 
     // Test "editing lock".
     $edit = array(
