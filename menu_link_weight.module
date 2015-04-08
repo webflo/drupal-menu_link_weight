@@ -475,6 +475,7 @@ function theme_menu_link_weight_reorder_element($variables) {
   // Iterate over each element in our $form['menu']['link']['menu_link_weight']
   // array.
   foreach (element_children($element) as $id) {
+    $has_tabledrag = TRUE;
     // Before we add our 'weight' column to the row, we need to give the
     // element a custom class so that it can be identified in the
     // drupal_add_tabledrag call.
@@ -519,7 +520,9 @@ function theme_menu_link_weight_reorder_element($variables) {
 
   // We now call the drupal_add_tabledrag() function in order to add the
   // tabledrag.js functionality onto our page.
-  drupal_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
+  if (isset($has_tabledrag) && $has_tabledrag) {
+    drupal_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
+  }
 
   return $output;
 }
