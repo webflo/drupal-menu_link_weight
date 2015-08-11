@@ -24,7 +24,7 @@ define('MENU_LINK_WEIGHT_MAX_DELTA', 50);
  * Implements hook_form_FORM_ID_alter().
  */
 function menu_link_weight_form_node_form_alter(&$form, &$form_state) {
-  if (!user_access('administer menu') || !isset($form['menu']['link']) {
+  if (!user_access('administer menu') || !isset($form['menu']['link'])) {
     // Only allow users with "administer menu" permissions.
     return;
   }
