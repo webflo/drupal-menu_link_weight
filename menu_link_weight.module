@@ -417,6 +417,11 @@ function menu_link_weight_node_form_submit($form, &$form_state) {
     return;
   }
 
+  // Return on empty submissions.
+  if (!isset($form_state['values']['menu']['menu_link_weight'])) {
+    return;
+  }
+
   $transaction = db_transaction();
   try {
     // Because the form elements were keyed with the item ids from the database,
