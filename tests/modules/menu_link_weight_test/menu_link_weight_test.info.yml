@@ -1,0 +1,6 @@
+name: 'Menu Link Weight Test'
+description: 'Support module for the Menu Link Weight tests.Ö
+core: 8.x
+package: Testing
+dependencies:
+  - menu_link_weight

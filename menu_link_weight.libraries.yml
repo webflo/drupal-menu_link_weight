@@ -1,0 +1,6 @@
+menu_link_weight:
+  js:
+    js/menu_link_weight.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
