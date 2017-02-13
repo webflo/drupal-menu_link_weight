@@ -1,0 +1,6 @@
+{
+    "name": "drupal/menu_link_weight",
+    "description": "Menu link weigth module",
+    "type": "drupal-module",
+    "license": "GPL-2.0+"
+}
