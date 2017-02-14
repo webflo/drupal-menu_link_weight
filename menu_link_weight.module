@@ -33,6 +33,11 @@ define('MENU_LINK_WEIGHT_MAX_DELTA', 50);
  * Implements hook_form_BASE_FORM_ID_alter() for node forms.
  */
 function menu_link_weight_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  // Opt out if the node has no menu.
+  if (!isset($form['menu']['link'])) {
+    return;
+  }
+
   $current_user = \Drupal::currentUser();
   $module_handler = \Drupal::moduleHandler();
   /** @var \Drupal\Core\Render\ElementInfoManagerInterface $element_info_manager */
