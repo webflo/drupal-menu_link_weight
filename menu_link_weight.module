@@ -404,7 +404,7 @@ function menu_link_weight_node_form_validate($form, FormStateInterface $form_sta
   $parent_element = $form['menu']['link']['menu_parent'];
   $parent_value = _menu_link_weight_get_parent_value_from_element($parent_element, $form_state);
   if ($form_state->hasValue(['menu', 'menu_link_weight'])) {
-    list($menu_name, $parent_id) = explode(':', $parent_value);
+    list($menu_name, $parent_id) = explode(':', $parent_value, 2);
     // Loop through submitted weights and confirm that the parent link/menu
     // are still the same.
     $weights = $form_state->getValue(['menu', 'menu_link_weight']);
